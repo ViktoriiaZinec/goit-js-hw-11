@@ -8,11 +8,12 @@ const form = document.querySelector('form');
 const btn = document.querySelector('button');
 let inputValue = '';
 let page = 2;
+let perPage = 40;
 
 // console.log(gallery, form, btn);
 let simpleLightBox;
 const loadMore = document.querySelector('.more');
-
+loadMore.innerHTML = '';
 form.addEventListener('submit', handleInput);
 
 function handleInput(event) {
@@ -28,11 +29,12 @@ function handleInput(event) {
     gallery.innerHTML = '';
     return;
   }
-  fetchPhotos(input, 1).then(data => {
+  fetchPhotos(input, page).then(data => {
     if (data.totalHits === 0) {
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
+      loadMore.innerHTML = '';
       gallery.innerHTML = '';
     } else {
       console.log(data);
@@ -46,6 +48,7 @@ function handleInput(event) {
 
       // simpleLightBox = new SimpleLightbox('li');
       Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
+      loadMore.innerHTML = '...Load more';
     }
   });
 }
@@ -99,6 +102,9 @@ images.forEach(image => {
 
 console.log(altValues);
 
+const photoCard = document.querySelector('ul li');
+console.log(photoCard);
+
 //  simpleLightBox = new SimpleLightbox('li').refresh();
 // simpleLightBox = new SimpleLightbox({
 //   elements: document.querySelectorAll('img'),
@@ -111,12 +117,27 @@ const observer = new IntersectionObserver(callback);
 async function callback(entries, observer) {
   if (entries[0].isIntersecting && inputValue !== '') {
     console.log(entries);
+
+    page++;
     const data = await fetchPhotos(inputValue, page).then(data => {
-      page++;
-      console.log(data);
       const res = markup(data.hits);
-      // printCount(res);
       gallery.innerHTML += res;
+
+      let showPages = data.totalHits / 40;
+
+      if (showPages <= page) {
+        Notiflix.Notify.failure(
+          "We're sorry, but you've reached the end of search results."
+        );
+      }
+      // if (data.totalHits <= page * 40) {
+      //   console.log(totalHits, page);
+      //   loadMore.innerHTML = '';
+      //   Notiflix.Notify.failure(
+      //     'Sorry, there are no images matching your search query. Please try again.'
+      //   );
+      // }
+
       // simpleLightBox = new SimpleLightbox({
       //   elements: document.querySelectorAll('li'),
       //   captionDelay: 250,
@@ -129,9 +150,3 @@ async function callback(entries, observer) {
 
 console.log(loadMore);
 observer.observe(loadMore);
-
-function cleanGallery() {
-  refs.gallery.innerHTML = '';
-  page = 1;
-  loadMore.innerHTML = '';
-}

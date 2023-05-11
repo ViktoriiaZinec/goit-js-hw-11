@@ -13,7 +13,7 @@ const API = axios.create({
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: 'true',
-    per_page: 10,
+    per_page: 40,
   },
 });
 // const API = 'https://rickandmortyapi.com/api/';
