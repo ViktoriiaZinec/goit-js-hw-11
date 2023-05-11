@@ -1,5 +1,4 @@
 import { fetchPhotos } from './api';
-import debounce from 'lodash.debounce';
 import SimpleLightbox from 'simplelightbox';
 import Notiflix from 'notiflix';
 
@@ -8,6 +7,7 @@ const gallery = document.querySelector('.gallery');
 const form = document.querySelector('form');
 const btn = document.querySelector('button');
 let inputValue = '';
+let page = 2;
 
 // console.log(gallery, form, btn);
 let simpleLightBox;
@@ -105,16 +105,13 @@ console.log(altValues);
 //   captions: altValues,
 //   captionDelay: 250,
 // });
-// simpleLightBox = new SimpleLightbox('.gallery a').refresh();
-// Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
 
 const observer = new IntersectionObserver(callback);
 
-function callback(entries, observer) {
-  if (entries[0].isIntersecting) {
+async function callback(entries, observer) {
+  if (entries[0].isIntersecting && inputValue !== '') {
     console.log(entries);
-    let page = 2;
-    fetchPhotos(inputValue, page).then(data => {
+    const data = await fetchPhotos(inputValue, page).then(data => {
       page++;
       console.log(data);
       const res = markup(data.hits);
@@ -129,5 +126,12 @@ function callback(entries, observer) {
     });
   }
 }
+
 console.log(loadMore);
 observer.observe(loadMore);
+
+function cleanGallery() {
+  refs.gallery.innerHTML = '';
+  page = 1;
+  loadMore.innerHTML = '';
+}
