@@ -12,6 +12,7 @@ let perPage = 40;
 
 // console.log(gallery, form, btn);
 let simpleLightBox;
+
 const loadMore = document.querySelector('.more');
 loadMore.innerHTML = '';
 form.addEventListener('submit', handleInput);
@@ -65,13 +66,13 @@ function printCount(text) {
   }
   console.log(count);
 }
-
+// {/* <a class="gallery__link" href="${element.largeImageURL}"> */}</a>
 const markup = elements => {
   return elements
     .map(
       element =>
         `<li class="gallery__item photo-card">
-        <a class="gallery__link" href="${element.largeImageURL}">
+        
     <img class="gallery__image" src="${element.webformatURL}" alt="${element.tags}" loading="lazy" />
     <div class="info">
       <p class="info-item">
@@ -87,7 +88,7 @@ const markup = elements => {
         <b>Downloads:<br/> ${element.downloads}</b>
       </p>
     </div>
-  </a>
+  
   </li>`
     )
     .join('');
@@ -125,23 +126,12 @@ async function callback(entries, observer) {
 
       let showPages = data.totalHits / 40;
 
-      if (showPages <= page) {
+      if (showPages <= page && data.totalHits !== 0) {
         Notiflix.Notify.failure(
           "We're sorry, but you've reached the end of search results."
         );
+        loadMore.innerHTML = '';
       }
-      // if (data.totalHits <= page * 40) {
-      //   console.log(totalHits, page);
-      //   loadMore.innerHTML = '';
-      //   Notiflix.Notify.failure(
-      //     'Sorry, there are no images matching your search query. Please try again.'
-      //   );
-      // }
-
-      // simpleLightBox = new SimpleLightbox({
-      //   elements: document.querySelectorAll('li'),
-      //   captionDelay: 250,
-      // });
 
       // simpleLightBox = new SimpleLightbox('li');
     });
