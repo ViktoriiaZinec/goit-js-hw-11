@@ -7,8 +7,11 @@ const gallery = document.querySelector('.gallery');
 
 const form = document.querySelector('form');
 const btn = document.querySelector('button');
+let inputValue = '';
+
 // console.log(gallery, form, btn);
 let simpleLightBox;
+const loadMore = document.querySelector('.more');
 
 form.addEventListener('submit', handleInput);
 
@@ -17,6 +20,7 @@ function handleInput(event) {
   page = 1;
   event.preventDefault();
   const input = event.target.elements.searchQuery.value.trim();
+  inputValue = input;
   if (input === '') {
     Notiflix.Notify.failure(
       'The search string cannot be empty. Please specify your search query.'
@@ -24,7 +28,7 @@ function handleInput(event) {
     gallery.innerHTML = '';
     return;
   }
-  fetchPhotos(input).then(data => {
+  fetchPhotos(input, 1).then(data => {
     if (data.totalHits === 0) {
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
@@ -33,19 +37,39 @@ function handleInput(event) {
     } else {
       console.log(data);
       const res = markup(data.hits);
+      printCount(res);
       gallery.innerHTML = res;
-      simpleLightBox = new SimpleLightbox('.gallery a').refresh();
+      // simpleLightBox = new SimpleLightbox({
+      //   elements: document.querySelectorAll('li'),
+      //   captionDelay: 250,
+      // });
+
+      // simpleLightBox = new SimpleLightbox('li');
       Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
     }
   });
+}
+
+function printCount(text) {
+  let idx = 0;
+  let count = 0;
+  while (idx !== -1) {
+    idx = text.indexOf('<li class', idx);
+    if (idx !== -1) {
+      idx++;
+      count++;
+    }
+  }
+  console.log(count);
 }
 
 const markup = elements => {
   return elements
     .map(
       element =>
-        `<a class="photo-card gallery__link" href="${element.largeImageURL}">
-    <img src="${element.webformatURL}" alt="" width='340' height='220' loading="lazy" />
+        `<li class="gallery__item photo-card">
+        <a class="gallery__link" href="${element.largeImageURL}">
+    <img class="gallery__image" src="${element.webformatURL}" alt="${element.tags}" loading="lazy" />
     <div class="info">
       <p class="info-item">
         <b>Likes:<br/> ${element.likes}</b>
@@ -60,7 +84,8 @@ const markup = elements => {
         <b>Downloads:<br/> ${element.downloads}</b>
       </p>
     </div>
-  </a>`
+  </a>
+  </li>`
     )
     .join('');
 };
@@ -74,10 +99,35 @@ images.forEach(image => {
 
 console.log(altValues);
 
-simpleLightBox = new SimpleLightbox({
-  elements: document.querySelectorAll('img'),
-  captions: altValues,
-  captionDelay: 250,
-});
-simpleLightBox = new SimpleLightbox('.gallery a').refresh();
-Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
+//  simpleLightBox = new SimpleLightbox('li').refresh();
+// simpleLightBox = new SimpleLightbox({
+//   elements: document.querySelectorAll('img'),
+//   captions: altValues,
+//   captionDelay: 250,
+// });
+// simpleLightBox = new SimpleLightbox('.gallery a').refresh();
+// Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
+
+const observer = new IntersectionObserver(callback);
+
+function callback(entries, observer) {
+  if (entries[0].isIntersecting) {
+    console.log(entries);
+    let page = 2;
+    fetchPhotos(inputValue, page).then(data => {
+      page++;
+      console.log(data);
+      const res = markup(data.hits);
+      // printCount(res);
+      gallery.innerHTML += res;
+      // simpleLightBox = new SimpleLightbox({
+      //   elements: document.querySelectorAll('li'),
+      //   captionDelay: 250,
+      // });
+
+      // simpleLightBox = new SimpleLightbox('li');
+    });
+  }
+}
+console.log(loadMore);
+observer.observe(loadMore);

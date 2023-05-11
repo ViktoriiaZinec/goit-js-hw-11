@@ -13,16 +13,18 @@ const API = axios.create({
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: 'true',
-    per_page: 40,
+    per_page: 10,
   },
 });
 // const API = 'https://rickandmortyapi.com/api/';
 // const KEY = '36254227-b1cc2f8da5f48ab7368a52fdf';
 
-export async function fetchPhotos(input) {
+export async function fetchPhotos(input, index) {
   //   console.log(input);
-  return await API.get('', { params: { q: input } }).then(response => {
-    console.log(response.data);
-    return response.data;
-  });
+  return await API.get('', { params: { q: input, page: index } }).then(
+    response => {
+      console.log(response.data);
+      return response.data;
+    }
+  );
 }
